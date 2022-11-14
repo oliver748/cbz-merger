@@ -1,6 +1,7 @@
 # CBZ Merger
 A quick and easy way to merge a bunch of your manga/manhwa/comics into one cbz file — this can be used if you don't want to switch cbz file all the time.
 
+Future implementations will be made - like being able to remove certain pages which can create a better flow when reading.
 
 # Installation
 1. Git clone or download it
