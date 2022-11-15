@@ -1,6 +1,6 @@
+import os
 import argparse
 from shutil import rmtree
-from os import renames, listdir
 from glob import glob
 from zipfile import ZipFile
 from os.path import basename, join
@@ -9,8 +9,9 @@ from os.path import basename, join
 class CBZMerger:
     def __init__(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument("--folder", "-f", help="Folder where CBZ files are located")
-        parser.add_argument("--output", "-o", help="Filename of the merged CBZ file")
+        parser.add_argument("--folder", "-f", help="Folder where CBZ/CBR files are located")
+        parser.add_argument("--output", "-o", help="Filename of the merged CBZ/CBR file")
+        parser.add_argument("--include-subdirs", action='store_true', help="Depicts if CBZ/CBR files in subfolders are included")
         # System to not include first page and/or last page - doesnt work atm
         # parser.add_argument("--first-page", help="Removes first page - y/n")
         # parser.add_argument("--last-page", help="Removes last page - y/n")
@@ -21,6 +22,7 @@ class CBZMerger:
         self.folder = args.folder
         self.output_name = args.output
         self.temp = "temp_folder"
+        self.include_subdirs = args.include_subdirs
         # System to not include first page and/or last page - doesnt work atm
         # self.first_page = args.first_page
         # self.last_page = args.last_page
@@ -31,25 +33,37 @@ class CBZMerger:
         self.delete_temp()
 
 
-    def fetch_files(self): # fetches all .cbr and .cbz files needed
-        fetch_cbz = glob(f"{self.folder}/*.cbz")
-        fetcb_cbr = glob(f"{self.folder}/*.cbr")
-        files = fetch_cbz + fetcb_cbr
-        print(f"Found a total of {len(files)} files")
-        return sorted(files)
+    def fetch_files(self):
+        """
+        finds all files (subdir files also) and checks if theyre 
+        cbz or cbr files. then it also checks if '--include-subdirs-'
+        is toggled because if its not, then it only takes files
+        that are in the folder but not in the sub folders.
+        """
+        all_paths = []
+        for path, subdirs, files in os.walk(self.folder):
+            for name in files:
+                file_path = os.path.join(path, name)
+                if file_path.endswith('.cbr') or file_path.endswith('.cbz'):
+                    if self.include_subdirs is not None:
+                        all_paths.append(file_path)
+                    elif os.path.exists(f"{self.folder}/{name}"):
+                        all_paths.append(file_path)
+ 
+        print(f"Found a total of {len(all_paths)} files")
+        return sorted(all_paths)
 
 
-    def list_pages(self, folder): # finds all pages
-        pngs = glob(f"{folder}/**/*.png", recursive=True)
-        jpgs = glob(f"{folder}/**/*.jpg", recursive=True)
+    def list_pages(self, temp_folder): # finds all pages
+        pngs = glob(f"{temp_folder}/**/*.png", recursive=True)
+        jpgs = glob(f"{temp_folder}/**/*.jpg", recursive=True)
         pages = jpgs + pngs
-
         # System to not include first page and/or last page - doesnt work atm
         # if self.first_page.lower() == 'y':
         #     pages = pages[1:len(pages)]
         # if self.last_page.lower() == 'y':
         #     pages = pages[:-1]
-
+        pages = pages[:-1]
         return sorted(pages)
 
 
@@ -62,7 +76,7 @@ class CBZMerger:
             zip_file = ZipFile(file_path) 
             zip_file.extractall(temp_folder)
             for filename in self.list_pages(temp_folder):
-                renames(filename, join(f"{self.temp}", name, basename(filename)))
+                os.renames(filename, join(f"{self.temp}", name, basename(filename)))
 
 
     def pack_files(self): # packs the files into one file
@@ -74,9 +88,10 @@ class CBZMerger:
 
 
     def delete_temp(self):
-        directory = listdir()
+        directory = os.listdir()
         for _object in directory:
             if self.temp == _object:
+                print('Job done! Deleting temp files...')
                 rmtree(self.temp)
 
 
