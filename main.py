@@ -32,9 +32,11 @@ class CBZMerger:
 
 
     def fetch_files(self):
-        fetch = glob(f"{self.folder}/*.cbz")
-        print(f"Found a total of {len(fetch)} .cbz files")
-        return sorted(fetch)
+        fetch_cbz = glob(f"{self.folder}/*.cbz")
+        fetcb_cbr = glob(f"{self.folder}/*.cbr")
+        files = fetch_cbz + fetcb_cbr
+        print(f"Found a total of {len(files)} .cbz and .cbr files")
+        return sorted(files)
 
 
     def list_pages(self, folder):
@@ -56,14 +58,13 @@ class CBZMerger:
             self.unpack_file(_file)
 
 
-    def unpack_file(self, file):
-        print(f"Unpacking {file}")
-        name, ext = splitext(basename(file))
-        zip_file = ZipFile(file)
-
+    def unpack_file(self, file_path):
+        name = file_path.split('/')[-1] # finds filename from filepath
         temp_folder = f"temp_{name}"
-        zip_file.extractall(temp_folder)
 
+        print(f"Unpacking {name}")
+        zip_file = ZipFile(file_path) 
+        zip_file.extractall(temp_folder)
         for filename in self.list_pages(temp_folder):
             renames(filename, join(f"{self.temp}", name, basename(filename)))
 
