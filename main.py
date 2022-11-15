@@ -58,12 +58,14 @@ class CBZMerger:
         pngs = glob(f"{temp_folder}/**/*.png", recursive=True)
         jpgs = glob(f"{temp_folder}/**/*.jpg", recursive=True)
         pages = jpgs + pngs
+        
         # System to not include first page and/or last page - doesnt work atm
         # if self.first_page.lower() == 'y':
         #     pages = pages[1:len(pages)]
         # if self.last_page.lower() == 'y':
         #     pages = pages[:-1]
-        pages = pages[:-1]
+        # pages = pages[:-1]
+        
         return sorted(pages)
 
 
