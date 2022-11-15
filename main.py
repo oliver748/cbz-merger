@@ -11,7 +11,7 @@ class CBZMerger:
         parser = argparse.ArgumentParser()
         parser.add_argument("--folder", "-f", help="Folder where CBZ/CBR files are located")
         parser.add_argument("--output", "-o", help="Filename of the merged CBZ/CBR file")
-        parser.add_argument("--include-subdirs", action='store_true', help="Depicts if CBZ/CBR files in subfolders are included")
+        parser.add_argument("--include-subdirs", action='store_true', help="Decides if CBZ/CBR files in subfolders are included")
         # System to not include first page and/or last page - doesnt work atm
         # parser.add_argument("--first-page", help="Removes first page - y/n")
         # parser.add_argument("--last-page", help="Removes last page - y/n")
